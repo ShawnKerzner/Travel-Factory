@@ -3,6 +3,19 @@ info:
   title: My API
   version: 1.0.0
 paths:
+  /auth/login:
+    post:
+      x-handler: handlers/auth#login
+      x-inputParser: handlers/auth#parseLoginInput
+      summary: Log in and receive a JWT
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Missing email or password
+        '401':
+          description: Invalid email or password
+
   /hello:
     get:
       x-handler: handlers/hello#getHello

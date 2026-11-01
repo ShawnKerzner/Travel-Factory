@@ -1,0 +1,48 @@
+import bcrypt from "bcryptjs";
+import { CommonEvent } from "commoneventframework/dist/types/commonEvent";
+import { Response } from "commoneventframework";
+import { InputParserFn, HandlerFn } from "./types";
+import { AppDataSource } from "../data-source";
+import { User } from "../entities/User";
+import { signToken } from "../auth/jwt";
+
+interface LoginInput {
+	email: string;
+	password: string;
+}
+
+export const parseLoginInput: InputParserFn = (event: CommonEvent) => {
+	let body: any;
+	try {
+		body = event.body ? JSON.parse(event.body) : {};
+	} catch {
+		return new Response(400, { error: "Invalid JSON body" });
+	}
+
+	const { email, password } = body;
+	if (!email || !password) {
+		return new Response(400, { error: "email and password are required" });
+	}
+
+	return { email, password } as LoginInput;
+};
+
+export const login: HandlerFn = async (input: LoginInput) => {
+	if (!AppDataSource.isInitialized) {
+		await AppDataSource.initialize();
+	}
+
+	const userRepo = AppDataSource.getRepository(User);
+	const user = await userRepo.findOneBy({ email: input.email });
+	if (!user) {
+		return new Response(401, { error: "Invalid email or password" });
+	}
+
+	const passwordMatches = await bcrypt.compare(input.password, user.password);
+	if (!passwordMatches) {
+		return new Response(401, { error: "Invalid email or password" });
+	}
+
+	const token = signToken({ sub: user.id, role: user.role });
+	return { token };
+};
