@@ -6,6 +6,8 @@ import { approveVacationRequest } from "../commands/approveVacationRequest";
 import { rejectVacationRequest } from "../commands/rejectVacationRequest";
 import { getMyVacationRequests } from "../queries/getMyVacationRequests";
 import { getVacationRequestsForValidator, parseStatusFilter, ValidatorListFilters } from "../queries/getVacationRequestsForValidator";
+import { getTeamVacations } from "../queries/getTeamVacations";
+import { isValidDateRange } from "../businessRules/vacationRequestRules";
 import { composeParsers, requireAuth, requireRole } from "../auth/guards";
 import { UserRole } from "../entities/User";
 import { parsePagination, PaginationParams } from "../utils/pagination";
@@ -125,5 +127,31 @@ export const rejectRequest: HandlerFn = async (input: ApproveRejectInput) => {
 	if (result instanceof Response) {
 		return result;
 	}
+	return new Response(200, result as unknown as object);
+};
+
+interface TeamPlanningInput {
+	startDate: string;
+	endDate: string;
+}
+
+export const parseTeamPlanningInput: InputParserFn = (event: CommonEvent) => {
+	const startDate = event.queryStringParameters?.startDate;
+	const endDate = event.queryStringParameters?.endDate;
+
+	if (!startDate || !endDate) {
+		return new Response(400, { error: "startDate and endDate are required" });
+	}
+	if (!isValidDateRange({ startDate, endDate })) {
+		return new Response(400, { error: "endDate must be on or after startDate" });
+	}
+
+	return { startDate, endDate };
+};
+
+export const parseTeamPlanningRequest = composeParsers(requireAuth, parseTeamPlanningInput);
+
+export const getTeamPlanning: HandlerFn = async (input: TeamPlanningInput) => {
+	const result = await getTeamVacations(input.startDate, input.endDate);
 	return new Response(200, result as unknown as object);
 };

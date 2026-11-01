@@ -16,7 +16,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 6 | My requests endpoint (pagination) | done |
 | 7 | Validator list endpoint (filters + pagination) | done |
 | 8 | Approve / reject endpoints | done |
-| 9 | Team planning endpoint | not started |
+| 9 | Team planning endpoint | done |
 | 10 | (extra) Edit/cancel pending request | not started |
 | 11 | Frontend setup (Vite, Tailwind, Router, Vuex, Axios) | not started |
 | 12 | Login + auth store + route guards | not started |
@@ -56,3 +56,5 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - Once a request leaves pending (approved OR rejected), it's locked from further action - a new isPending check, separate from isModifiable (rule 3's literal wording, != APPROVED only). Why: rule 3 is silent on rejected requests, and treating only "pending" as actionable is the simpler mental model, avoiding reopening a rejection by approving it later.
 - Reject validates the comment (rule 5) before touching the database at all, same pattern as submit's date checks. Why: cheap, pure validation should happen before any DB work, not after.
 - approveVacationRequest/rejectVacationRequest both guard with Number.isInteger(id) before querying, returning 404 immediately for a non-numeric id. Why: a malformed id can't exist either way, and passing NaN straight into a SQL query risked a 500 instead of a clean 404.
+- Resolved the "team vacation planning for both roles" vague requirement: "team" means the whole company, since Users (id, name, email, password, role, created_at) has no team/department field and the spec doesn't call for adding one. Only approved requests count as "on vacation" - pending isn't confirmed, so showing it as fact could mislead planning. startDate/endDate are required query params (400 if missing), since there's no sensible default range for a calendar-style view.
+- The overlap check for this endpoint runs at the database level via TypeORM's LessThanOrEqual/MoreThanOrEqual operators - the same inclusive-boundary formula as doesOverlap from chunk 4, just comparing against the query range instead of another request's dates.
