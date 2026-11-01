@@ -11,7 +11,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 1 | CEF spike | done |
 | 2 | Database (entities, migration, seed) | done |
 | 3 | Auth (JWT login, role checks) | done |
-| 4 | Business rules module + unit tests | not started |
+| 4 | Business rules module + unit tests | done |
 | 5 | Submit request endpoint | not started |
 | 6 | My requests endpoint (pagination) | not started |
 | 7 | Validator list endpoint (filters + pagination) | not started |
@@ -40,3 +40,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - requireRole(role) internally runs the same check as requireAuth, rather than requiring both to be composed together. Why: a role can't be trusted without first verifying the token's signature, so role-checking already implies auth-checking; composing both separately would be redundant.
 - Jest + ts-jest for the test runner. Why: standard pairing for a TypeScript/Node backend, no extra configuration for the project's module system.
 - Tests point at vacation_test via a Jest setupFiles script that sets DB_NAME before dotenv loads the rest of .env. Why: TypeScript hoists import statements above other code, so setting the env var directly in a test file would run too late; setupFiles runs before any test file loads.
+- Rule 1 (end after start) allows same-day requests (end == start). Why: a literal "strictly after" reading would make a 1-day vacation impossible to model, which doesn't match real usage.
+- Rule 2 (no overlap) treats touching boundary dates as overlapping, and ignores rejected requests entirely. Why: each date is a whole calendar day, so sharing one is a genuine conflict; a rejected request never became a real vacation, so it shouldn't permanently block those dates.
+- Rule 4 (no past requests) allows a start date of today. Why: today hasn't happened yet at submission time, so it isn't "the past."
+- Dates are compared as plain "YYYY-MM-DD" strings, never converted to Date objects, in all business rule functions. Why: string comparison sorts identically to chronological order for this format, and sidesteps timezone bugs entirely rather than working around them.
