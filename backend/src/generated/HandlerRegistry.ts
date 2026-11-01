@@ -4,6 +4,7 @@ import { registerHandlerRefs } from "commoneventframework";
 
 import * as __cef_handlers_auth from "../handlers/auth";
 import * as __cef_handlers_hello from "../handlers/hello";
+import * as __cef_handlers_users from "../handlers/users";
 import * as __cef_handlers_vacationRequests from "../handlers/vacationRequests";
 
 export class HandlerRegistry {
@@ -14,9 +15,13 @@ export class HandlerRegistry {
 			"handlers/hello#getHello": __cef_handlers_hello.getHello,
 			"handlers/hello#getHelloByName": __cef_handlers_hello.getHelloByName,
 			"handlers/hello#parseHelloByNameInput": __cef_handlers_hello.parseHelloByNameInput,
+			"handlers/users#listUsers": __cef_handlers_users.listUsers,
+			"handlers/users#parseUsersListRequest": __cef_handlers_users.parseUsersListRequest,
 			"handlers/vacationRequests#getMyRequests": __cef_handlers_vacationRequests.getMyRequests,
+			"handlers/vacationRequests#listVacationRequests": __cef_handlers_vacationRequests.listVacationRequests,
 			"handlers/vacationRequests#parseMyRequestsRequest": __cef_handlers_vacationRequests.parseMyRequestsRequest,
 			"handlers/vacationRequests#parseSubmitRequest": __cef_handlers_vacationRequests.parseSubmitRequest,
+			"handlers/vacationRequests#parseValidatorListRequest": __cef_handlers_vacationRequests.parseValidatorListRequest,
 			"handlers/vacationRequests#submitRequest": __cef_handlers_vacationRequests.submitRequest,
 		});
 	}

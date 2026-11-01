@@ -14,7 +14,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 4 | Business rules module + unit tests | done |
 | 5 | Submit request endpoint | done |
 | 6 | My requests endpoint (pagination) | done |
-| 7 | Validator list endpoint (filters + pagination) | not started |
+| 7 | Validator list endpoint (filters + pagination) | done |
 | 8 | Approve / reject endpoints | not started |
 | 9 | Team planning endpoint | not started |
 | 10 | (extra) Edit/cancel pending request | not started |
@@ -50,3 +50,6 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - GET /vacation-requests/me requires only requireAuth, not a specific role. Why: it's inherently scoped to "my own data" regardless of role.
 - Pagination response shape is { data, total, page, limit }, defaulting to page=1/limit=10; invalid page/limit values silently fall back to defaults rather than erroring. Why: standard shape so the frontend can compute total pages; a GET for your own data shouldn't 400 over a bad query param.
 - User.password is now @Column({ select: false }) - never loaded by any query by default, anywhere, unless explicitly re-selected. Why: findAndCount's relations option loads the full related entity by default; a nested TypeORM select scoped to that relation turned out to break the count query entirely (confirmed by removing it), so the fix had to be at the entity level instead. login's query was updated to explicitly re-select password, since it needs the hash to compare against.
+- GET /users (filter dropdown) returns requesters only, never validators. Why: validators can't submit requests, so they'd just be dead options that never match anything.
+- An invalid ?status= value is silently ignored (treated as no filter), same philosophy as invalid pagination params. Why: a GET shouldn't error over a bad query param.
+- GET /vacation-requests and POST /vacation-requests share the same root.yaml path key - YAML doesn't allow the same top-level mapping key twice, so both methods have to live under one shared path entry (get: and post: as siblings), not two separate ones. Caught immediately by cef-gen-handlers failing outright with a YAMLException, not a silent bug.

@@ -32,6 +32,47 @@ paths:
           description: Authenticated but not a requester
         '409':
           description: Overlaps an existing request
+    get:
+      x-handler: handlers/vacationRequests#listVacationRequests
+      x-inputParser: handlers/vacationRequests#parseValidatorListRequest
+      summary: List all vacation requests, with optional status/userId filters (validator only)
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: userId
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a validator
+
+  /users:
+    get:
+      x-handler: handlers/users#listUsers
+      x-inputParser: handlers/users#parseUsersListRequest
+      summary: List requesters, for the validator dashboard's filter dropdown
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a validator
 
   /vacation-requests/me:
     get:
