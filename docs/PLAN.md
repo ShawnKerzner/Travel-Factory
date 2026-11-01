@@ -7,9 +7,9 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 
 | # | Chunk | Status |
 |---|---|---|
-| 0 | Repo & structure | in progress |
-| 1 | CEF spike | not started |
-| 2 | Database (entities, migration, seed) | not started |
+| 0 | Repo & structure | done |
+| 1 | CEF spike | done |
+| 2 | Database (entities, migration, seed) | done |
 | 3 | Auth (JWT login, role checks) | not started |
 | 4 | Business rules module + unit tests | not started |
 | 5 | Submit request endpoint | not started |
@@ -31,3 +31,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - Project set up as its own repo at `vacation-management/`, separate from the DI_Bootcamp exercises repo. Why: DI_Bootcamp has its own unrelated CLAUDE.md contract (a progress-tracking coach for bootcamp exercises); this is a different, standalone project.
 - Backend and frontend: TypeScript. Why: TypeORM's decorator-based entities and CEF's typed handlers are built around TypeScript; JavaScript would lose most of that benefit.
 - Business actions (submit/approve/reject) are modeled as domain commands handled by pure command-handler functions, which emit typed domain events (VacationRequestSubmitted/Approved/Rejected) through a small in-process EventEmitter-based bus. CEF route handlers stay thin adapters (parse HTTP -> build command -> dispatch -> return result). Why: directly satisfies the "proper use of commands/events" grading criterion, and keeps command handlers unit-testable as plain functions with no HTTP/CEF involved.
+- PostgreSQL runs via Docker Compose (docker-compose.yml), not a local install. Why: consistent setup regardless of machine, and makes spinning up a separate vacation_test database trivial (docker/init-test-db.sql).
+- Docker's host port is 5433, not Postgres's default 5432. Why: this machine already had a local PostgreSQL Windows service bound to 5432; remapping avoided touching that pre-existing service.
+- Password hashing uses bcryptjs, not native bcrypt. Why: pure JS, no native build step, so it installs reliably on any machine that grades this.
+- User ids are a simple auto-incrementing integer (@PrimaryGeneratedColumn), not a UUID. Why: spec only requires "id" with no format; simplest option for a take-home.
