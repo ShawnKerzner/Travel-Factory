@@ -35,3 +35,4 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - Docker's host port is 5433, not Postgres's default 5432. Why: this machine already had a local PostgreSQL Windows service bound to 5432; remapping avoided touching that pre-existing service.
 - Password hashing uses bcryptjs, not native bcrypt. Why: pure JS, no native build step, so it installs reliably on any machine that grades this.
 - User ids are a simple auto-incrementing integer (@PrimaryGeneratedColumn), not a UUID. Why: spec only requires "id" with no format; simplest option for a take-home.
+- Every commit includes a short body explaining why the change was made, not just a Conventional Commits title. Why: the assignment calls for "meaningful commits," and since this code gets explained in a follow-up interview, the git history itself should carry that context, not just this log.
