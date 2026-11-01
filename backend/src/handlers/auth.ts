@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { CommonEvent } from "commoneventframework/dist/types/commonEvent";
 import { Response } from "commoneventframework";
 import { InputParserFn, HandlerFn } from "./types";
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { User } from "../entities/User";
 import { signToken } from "../auth/jwt";
 
@@ -28,9 +28,7 @@ export const parseLoginInput: InputParserFn = (event: CommonEvent) => {
 };
 
 export const login: HandlerFn = async (input: LoginInput) => {
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	const userRepo = AppDataSource.getRepository(User);
 	const user = await userRepo.findOne({

@@ -1,5 +1,5 @@
 import { Response } from "commoneventframework";
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest } from "../entities/VacationRequest";
 import { isPending } from "../businessRules/vacationRequestRules";
 
@@ -11,9 +11,7 @@ export interface CancelVacationRequestCommand {
 export async function cancelVacationRequest(
 	command: CancelVacationRequestCommand
 ): Promise<{ deleted: true; id: number } | Response> {
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	if (!Number.isInteger(command.id)) {
 		return new Response(404, { error: "Vacation request not found" });

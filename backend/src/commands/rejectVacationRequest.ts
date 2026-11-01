@@ -1,5 +1,5 @@
 import { Response } from "commoneventframework";
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest, VacationRequestStatus } from "../entities/VacationRequest";
 import { isPending, isValidRejectionComment } from "../businessRules/vacationRequestRules";
 import { eventBus, DomainEvent } from "../events/eventBus";
@@ -16,9 +16,7 @@ export async function rejectVacationRequest(
 		return new Response(400, { error: "A comment is required to reject a request" });
 	}
 
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	if (!Number.isInteger(command.id)) {
 		return new Response(404, { error: "Vacation request not found" });

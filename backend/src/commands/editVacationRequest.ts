@@ -1,5 +1,5 @@
 import { Response } from "commoneventframework";
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest } from "../entities/VacationRequest";
 import { isValidDateRange, isInPast, doesOverlap, isPending } from "../businessRules/vacationRequestRules";
 
@@ -23,9 +23,7 @@ export async function editVacationRequest(
 		return new Response(400, { error: "startDate cannot be in the past" });
 	}
 
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	if (!Number.isInteger(id)) {
 		return new Response(404, { error: "Vacation request not found" });

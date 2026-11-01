@@ -62,7 +62,7 @@ paths:
           description: Authenticated but not a validator
 
   /vacation-requests/:id/approve:
-    patch:
+    put:
       x-handler: handlers/vacationRequests#approveRequest
       x-inputParser: handlers/vacationRequests#parseApproveRequest
       summary: Approve a pending vacation request (validator only)
@@ -85,7 +85,7 @@ paths:
           description: Request is not pending
 
   /vacation-requests/:id/reject:
-    patch:
+    put:
       x-handler: handlers/vacationRequests#rejectRequest
       x-inputParser: handlers/vacationRequests#parseRejectRequest
       summary: Reject a pending vacation request with a required comment (validator only)
@@ -131,7 +131,7 @@ paths:
           description: Request not found, or not yours
         '409':
           description: Request is not pending
-    patch:
+    put:
       x-handler: handlers/vacationRequests#editRequest
       x-inputParser: handlers/vacationRequests#parseEditRequest
       summary: Edit your own pending vacation request's dates/reason (requester only)

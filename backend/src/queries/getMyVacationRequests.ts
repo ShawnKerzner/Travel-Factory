@@ -1,4 +1,4 @@
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest } from "../entities/VacationRequest";
 import { PaginationParams } from "../utils/pagination";
 
@@ -13,9 +13,7 @@ export async function getMyVacationRequests(
 	userId: number,
 	{ page, limit }: PaginationParams
 ): Promise<PaginatedResult<VacationRequest>> {
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	const repo = AppDataSource.getRepository(VacationRequest);
 	const [data, total] = await repo.findAndCount({

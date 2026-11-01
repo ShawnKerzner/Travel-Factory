@@ -21,7 +21,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 11 | Frontend setup (Vite, Tailwind, Router, Vuex, Axios) | done |
 | 12 | Login + auth store + route guards | done |
 | 13 | Requester page | done |
-| 14 | Validator dashboard | not started |
+| 14 | Validator dashboard | done |
 | 15 | Team planning view | not started |
 | 16 | (extra) UX extras | not started |
 | 17 | Wrap-up (README, final review) | not started |
@@ -75,3 +75,9 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - BaseInput needed inheritAttrs: false + v-bind="$attrs" on the inner <input>, not the wrapping <label>. Without it, an extra prop like :min would silently land on the label (where it does nothing) instead of the actual input - caught before it shipped, while wiring up the date inputs' min attribute.
 - Client-side validation mirrors the backend's rules via its own small isValidDateRange/isInPast functions (frontend/src/utils/validation.ts) - necessarily duplicated, not shared, since frontend and backend are separate npm packages with no shared package between them.
 - 11 new tests cover SubmitRequestForm, StatusBadge, and Pagination directly, matching the kickoff doc's named frontend test targets (form validation, status badge, pagination); the full list/loading/empty-state flow and the actual submit-to-list-refresh behavior were verified live in the browser against the real backend and real database instead, including confirming a submitted request's row in Postgres directly.
+- Approve acts immediately with no confirmation step; rejecting always requires a comment via a modal. Filters (status/requester) auto-refetch on change; changing a filter resets pagination to page 1 so you never land on a now-empty page.
+- RequestTable's generic design from chunk 13 paid off exactly as intended here - the validator dashboard reuses it as-is, adding only an extra column and Approve/Reject buttons via the slot, no table rewrite.
+- Found and fixed two real, pre-existing bugs while live-testing this chunk in the actual browser - neither ever surfaced via curl or Jest, since neither enforces CORS or creates genuine concurrent first-requests:
+  1. CEF's CORS handling hard-codes Access-Control-Allow-Methods to GET/POST/PUT/DELETE with no PATCH and no override hook (confirmed by reading its source; the latest available version, 1.0.19, already installed, has the same limitation). Switched approve/reject/edit from PATCH to PUT in root.yaml and the two frontend calls that use them - touches already-committed code from chunks 8 and 10.
+  2. Every query/command file had its own "if (!AppDataSource.isInitialized) { await AppDataSource.initialize(); }" - an unsynchronized check-then-act race. Concurrent first-requests (the dashboard's onMounted firing two API calls at once) could both see isInitialized===false and both call initialize(), crashing the second. Fixed with one shared, promise-cached ensureDataSourceInitialized() helper in data-source.ts that every query/command now calls instead, so concurrent callers await the same in-flight promise - touches files across chunks 5-10.
+- 5 new frontend tests cover RejectRequestModal directly; approve, reject-with-comment, both filters combined, and both bug fixes above were verified live against the real backend and database.

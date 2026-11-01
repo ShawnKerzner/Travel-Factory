@@ -2,12 +2,30 @@ import type { Module } from "vuex";
 import api from "../../api";
 import type { RequestRow } from "../../components/RequestTable.vue";
 
+export interface Requester {
+	id: number;
+	name: string;
+	email: string;
+}
+
+export interface ValidatorFilters {
+	status?: string;
+	userId?: number;
+}
+
 export interface RequestsState {
 	myRequests: RequestRow[];
 	myRequestsTotal: number;
 	myRequestsPage: number;
 	myRequestsLimit: number;
 	loading: boolean;
+	validatorRequests: RequestRow[];
+	validatorTotal: number;
+	validatorPage: number;
+	validatorLimit: number;
+	validatorFilters: ValidatorFilters;
+	validatorLoading: boolean;
+	requesters: Requester[];
 }
 
 export interface SubmitRequestPayload {
@@ -24,6 +42,13 @@ const requestsModule: Module<RequestsState, unknown> = {
 		myRequestsPage: 1,
 		myRequestsLimit: 10,
 		loading: false,
+		validatorRequests: [],
+		validatorTotal: 0,
+		validatorPage: 1,
+		validatorLimit: 10,
+		validatorFilters: {},
+		validatorLoading: false,
+		requesters: [],
 	}),
 	mutations: {
 		SET_MY_REQUESTS(state, { data, total, page, limit }) {
@@ -34,6 +59,21 @@ const requestsModule: Module<RequestsState, unknown> = {
 		},
 		SET_LOADING(state, loading: boolean) {
 			state.loading = loading;
+		},
+		SET_VALIDATOR_REQUESTS(state, { data, total, page, limit }) {
+			state.validatorRequests = data;
+			state.validatorTotal = total;
+			state.validatorPage = page;
+			state.validatorLimit = limit;
+		},
+		SET_VALIDATOR_FILTERS(state, filters: ValidatorFilters) {
+			state.validatorFilters = filters;
+		},
+		SET_VALIDATOR_LOADING(state, loading: boolean) {
+			state.validatorLoading = loading;
+		},
+		SET_REQUESTERS(state, requesters: Requester[]) {
+			state.requesters = requesters;
 		},
 	},
 	actions: {
@@ -49,6 +89,33 @@ const requestsModule: Module<RequestsState, unknown> = {
 		async submitRequest({ dispatch, state }, payload: SubmitRequestPayload) {
 			await api.post("/vacation-requests", payload);
 			await dispatch("fetchMyRequests", { page: state.myRequestsPage, limit: state.myRequestsLimit });
+		},
+		async fetchValidatorRequests({ commit, state }, { page = 1 }: { page?: number } = {}) {
+			commit("SET_VALIDATOR_LOADING", true);
+			try {
+				const response = await api.get("/vacation-requests", {
+					params: { page, limit: state.validatorLimit, ...state.validatorFilters },
+				});
+				commit("SET_VALIDATOR_REQUESTS", response.data);
+			} finally {
+				commit("SET_VALIDATOR_LOADING", false);
+			}
+		},
+		async setValidatorFilters({ commit, dispatch }, filters: ValidatorFilters) {
+			commit("SET_VALIDATOR_FILTERS", filters);
+			await dispatch("fetchValidatorRequests", { page: 1 });
+		},
+		async fetchRequesters({ commit }) {
+			const response = await api.get("/users");
+			commit("SET_REQUESTERS", response.data);
+		},
+		async approveRequest({ dispatch, state }, { id }: { id: number }) {
+			await api.put(`/vacation-requests/${id}/approve`);
+			await dispatch("fetchValidatorRequests", { page: state.validatorPage });
+		},
+		async rejectRequest({ dispatch, state }, { id, comment }: { id: number; comment: string }) {
+			await api.put(`/vacation-requests/${id}/reject`, { comment });
+			await dispatch("fetchValidatorRequests", { page: state.validatorPage });
 		},
 	},
 };

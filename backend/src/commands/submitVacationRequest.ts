@@ -1,5 +1,5 @@
 import { Response } from "commoneventframework";
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest, VacationRequestStatus } from "../entities/VacationRequest";
 import { isValidDateRange, isInPast, doesOverlap } from "../businessRules/vacationRequestRules";
 import { eventBus, DomainEvent } from "../events/eventBus";
@@ -14,9 +14,7 @@ export interface SubmitVacationRequestCommand {
 export async function submitVacationRequest(
 	command: SubmitVacationRequestCommand
 ): Promise<VacationRequest | Response> {
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	const { userId, startDate, endDate, reason } = command;
 

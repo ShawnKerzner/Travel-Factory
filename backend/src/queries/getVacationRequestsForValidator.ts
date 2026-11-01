@@ -1,4 +1,4 @@
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest, VacationRequestStatus } from "../entities/VacationRequest";
 import { PaginationParams } from "../utils/pagination";
 import { PaginatedResult } from "./getMyVacationRequests";
@@ -19,9 +19,7 @@ export async function getVacationRequestsForValidator(
 	filters: ValidatorListFilters,
 	{ page, limit }: PaginationParams
 ): Promise<PaginatedResult<VacationRequest>> {
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	const where: { status?: VacationRequestStatus; user?: { id: number } } = {};
 	if (filters.status) {

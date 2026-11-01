@@ -14,3 +14,15 @@ export const AppDataSource = new DataSource({
 	entities: ["src/entities/*.ts"],
 	migrations: ["src/migrations/*.ts"],
 });
+
+let initPromise: Promise<DataSource> | null = null;
+
+export function ensureDataSourceInitialized(): Promise<DataSource> {
+	if (AppDataSource.isInitialized) {
+		return Promise.resolve(AppDataSource);
+	}
+	if (!initPromise) {
+		initPromise = AppDataSource.initialize();
+	}
+	return initPromise;
+}

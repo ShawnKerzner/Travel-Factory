@@ -1,11 +1,9 @@
 import { LessThanOrEqual, MoreThanOrEqual } from "typeorm";
-import { AppDataSource } from "../data-source";
+import { AppDataSource, ensureDataSourceInitialized } from "../data-source";
 import { VacationRequest, VacationRequestStatus } from "../entities/VacationRequest";
 
 export async function getTeamVacations(startDate: string, endDate: string): Promise<VacationRequest[]> {
-	if (!AppDataSource.isInitialized) {
-		await AppDataSource.initialize();
-	}
+	await ensureDataSourceInitialized();
 
 	const repo = AppDataSource.getRepository(VacationRequest);
 	return repo.find({
