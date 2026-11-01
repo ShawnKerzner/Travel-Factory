@@ -24,12 +24,18 @@ const requesters = computed(() => store.state.requests.requesters);
 const statusFilter = ref("");
 const userIdFilter = ref("");
 const actionError = ref("");
+const loadError = ref("");
 
 const rejectModalOpen = ref(false);
 const rejectRequestId = ref<number | null>(null);
 
-function loadPage(newPage: number) {
-	store.dispatch("requests/fetchValidatorRequests", { page: newPage });
+async function loadPage(newPage: number) {
+	loadError.value = "";
+	try {
+		await store.dispatch("requests/fetchValidatorRequests", { page: newPage });
+	} catch (error: any) {
+		loadError.value = error.response?.data?.error ?? "Could not load the request list. Please try again.";
+	}
 }
 
 function applyFilters() {
@@ -68,8 +74,12 @@ function closeReject() {
 	rejectRequestId.value = null;
 }
 
-onMounted(() => {
-	store.dispatch("requests/fetchRequesters");
+onMounted(async () => {
+	try {
+		await store.dispatch("requests/fetchRequesters");
+	} catch {
+		// Filter dropdown just stays empty; not fatal to the page, no separate message needed.
+	}
 	loadPage(1);
 });
 </script>
@@ -91,6 +101,7 @@ onMounted(() => {
       <ErrorMessage v-if="actionError" :message="actionError" />
 
       <LoadingSpinner v-if="loading" />
+      <ErrorMessage v-else-if="loadError" :message="loadError" />
       <EmptyState v-else-if="requests.length === 0" message="No vacation requests match these filters." />
       <template v-else>
         <RequestTable :requests="requests" show-requester>

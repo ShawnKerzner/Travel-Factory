@@ -24,7 +24,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 14 | Validator dashboard | done |
 | 15 | Team planning view | done |
 | 16 | (extra) UX extras | not started |
-| 17 | Wrap-up (README, final review) | not started |
+| 17 | Wrap-up (README, final review) | in progress |
 
 ## Decision log
 
@@ -82,3 +82,4 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
   2. Every query/command file had its own "if (!AppDataSource.isInitialized) { await AppDataSource.initialize(); }" - an unsynchronized check-then-act race. Concurrent first-requests (the dashboard's onMounted firing two API calls at once) could both see isInitialized===false and both call initialize(), crashing the second. Fixed with one shared, promise-cached ensureDataSourceInitialized() helper in data-source.ts that every query/command now calls instead, so concurrent callers await the same in-flight promise - touches files across chunks 5-10.
 - 5 new frontend tests cover RejectRequestModal directly; approve, reject-with-comment, both filters combined, and both bug fixes above were verified live against the real backend and database.
 - Team planning defaults to the current calendar month on load, requires an explicit "View" click to re-query (not auto-fetch per keystroke, since a partially-typed date is invalid mid-entry), and is open to both roles (requireAuth only, no role meta on the route) - genuinely shared, not gated. Only the new current-month-range calculation got a dedicated test (month/year boundaries are easy to get subtly wrong); the rest reuses already-tested pieces (RequestTable, the same date validation from chunk 13) and was verified live instead, including confirming a requester can reach the page with a real 200, not a 403.
+- Chunk 17 cross-check: initial page-load fetches (my requests, validator list + requesters dropdown, team vacations) had no error handling - a failure other than 401 just showed an empty list with no explanation. Fixed with a loadError ref per view, shown via ErrorMessage. Found and fixed a second issue live while verifying the fix: the error and the empty-state messages were rendering at the same time (contradictory - "couldn't load" next to "you haven't submitted any"), since the v-if chain didn't treat them as mutually exclusive. Reordered to loading -> error -> empty -> table so only one ever shows. Verified live by actually stopping the backend and confirming the real error message appears alone, not a blank/confusing list.

@@ -20,7 +20,7 @@ const rangeError = ref("");
 const vacations = computed(() => store.state.requests.teamVacations);
 const loading = computed(() => store.state.requests.teamVacationsLoading);
 
-function loadRange() {
+async function loadRange() {
 	rangeError.value = "";
 
 	if (!startDate.value || !endDate.value) {
@@ -32,7 +32,11 @@ function loadRange() {
 		return;
 	}
 
-	store.dispatch("requests/fetchTeamVacations", { startDate: startDate.value, endDate: endDate.value });
+	try {
+		await store.dispatch("requests/fetchTeamVacations", { startDate: startDate.value, endDate: endDate.value });
+	} catch (error: any) {
+		rangeError.value = error.response?.data?.error ?? "Could not load team vacations. Please try again.";
+	}
 }
 
 onMounted(loadRange);
@@ -49,9 +53,8 @@ onMounted(loadRange);
         <BaseInput v-model="endDate" type="date" label="End Date" />
         <BaseButton type="button" @click="loadRange">View</BaseButton>
       </div>
-      <ErrorMessage v-if="rangeError" :message="rangeError" />
-
       <LoadingSpinner v-if="loading" />
+      <ErrorMessage v-else-if="rangeError" :message="rangeError" />
       <EmptyState v-else-if="vacations.length === 0" message="No approved vacations in this date range." />
       <RequestTable v-else :requests="vacations" show-requester />
     </main>
