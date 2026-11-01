@@ -19,7 +19,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 9 | Team planning endpoint | done |
 | 10 | (extra) Edit/cancel pending request | done |
 | 11 | Frontend setup (Vite, Tailwind, Router, Vuex, Axios) | done |
-| 12 | Login + auth store + route guards | not started |
+| 12 | Login + auth store + route guards | done |
 | 13 | Requester page | not started |
 | 14 | Validator dashboard | not started |
 | 15 | Team planning view | not started |
@@ -66,3 +66,8 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - Axios response interceptor clears the token and redirects to /login on any 401. Why: an expired/invalid token has nothing to recover - get the user back to a clean login state rather than leaving each view to handle it.
 - Tailwind CSS v4, via the @tailwindcss/vite plugin and a single @import "tailwindcss" in style.css - no tailwind.config.js or postcss config needed, since v4 changed its setup model from v3.
 - API base URL comes from VITE_API_BASE_URL in frontend/.env (gitignored, with .env.example committed), not hardcoded, matching the backend's own env-var pattern.
+- Wrong-role access (e.g. a requester visiting /validator) silently redirects to the user's own home page, no "Forbidden" page built - matches a 2-role app where it's really just "wrong URL," and the backend already returns 403 without the frontend needing to interpret it specially.
+- auth.ts (store) imports api, and api/index.ts imports store - a deliberate circular import. It's safe because both sides only reference the other inside callback/action bodies, never at module top-level, so ES modules' live bindings resolve it correctly; confirmed live in the browser (zero console errors) rather than just reasoned about.
+- JWT role is read client-side via a small hand-rolled base64url decoder (src/utils/jwt.ts), not a library - this is purely for picking a redirect target, never for trust/authorization, which the backend re-verifies on every real request regardless.
+- Introduced the first shared components (BaseInput, BaseButton, ErrorMessage) this chunk rather than waiting for chunk 13, since the login form needed them and they match the kickoff doc's own expected shared-component list.
+- Login's 10 tests cover the auth Vuex module and the LoginForm component directly (Vitest + Vue Test Utils, matching the kickoff doc's named test scope); route guard redirects were instead verified live in the browser against the real backend - successful login, invalid credentials, wrong role, logged-out access to a protected route, and already-authenticated access to /login.
