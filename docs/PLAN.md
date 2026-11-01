@@ -22,7 +22,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 12 | Login + auth store + route guards | done |
 | 13 | Requester page | done |
 | 14 | Validator dashboard | done |
-| 15 | Team planning view | not started |
+| 15 | Team planning view | done |
 | 16 | (extra) UX extras | not started |
 | 17 | Wrap-up (README, final review) | not started |
 
@@ -81,3 +81,4 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
   1. CEF's CORS handling hard-codes Access-Control-Allow-Methods to GET/POST/PUT/DELETE with no PATCH and no override hook (confirmed by reading its source; the latest available version, 1.0.19, already installed, has the same limitation). Switched approve/reject/edit from PATCH to PUT in root.yaml and the two frontend calls that use them - touches already-committed code from chunks 8 and 10.
   2. Every query/command file had its own "if (!AppDataSource.isInitialized) { await AppDataSource.initialize(); }" - an unsynchronized check-then-act race. Concurrent first-requests (the dashboard's onMounted firing two API calls at once) could both see isInitialized===false and both call initialize(), crashing the second. Fixed with one shared, promise-cached ensureDataSourceInitialized() helper in data-source.ts that every query/command now calls instead, so concurrent callers await the same in-flight promise - touches files across chunks 5-10.
 - 5 new frontend tests cover RejectRequestModal directly; approve, reject-with-comment, both filters combined, and both bug fixes above were verified live against the real backend and database.
+- Team planning defaults to the current calendar month on load, requires an explicit "View" click to re-query (not auto-fetch per keystroke, since a partially-typed date is invalid mid-entry), and is open to both roles (requireAuth only, no role meta on the route) - genuinely shared, not gated. Only the new current-month-range calculation got a dedicated test (month/year boundaries are easy to get subtly wrong); the rest reuses already-tested pieces (RequestTable, the same date validation from chunk 13) and was verified live instead, including confirming a requester can reach the page with a real 200, not a 403.

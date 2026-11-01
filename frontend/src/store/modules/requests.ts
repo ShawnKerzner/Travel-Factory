@@ -26,6 +26,8 @@ export interface RequestsState {
 	validatorFilters: ValidatorFilters;
 	validatorLoading: boolean;
 	requesters: Requester[];
+	teamVacations: RequestRow[];
+	teamVacationsLoading: boolean;
 }
 
 export interface SubmitRequestPayload {
@@ -49,6 +51,8 @@ const requestsModule: Module<RequestsState, unknown> = {
 		validatorFilters: {},
 		validatorLoading: false,
 		requesters: [],
+		teamVacations: [],
+		teamVacationsLoading: false,
 	}),
 	mutations: {
 		SET_MY_REQUESTS(state, { data, total, page, limit }) {
@@ -74,6 +78,12 @@ const requestsModule: Module<RequestsState, unknown> = {
 		},
 		SET_REQUESTERS(state, requesters: Requester[]) {
 			state.requesters = requesters;
+		},
+		SET_TEAM_VACATIONS(state, data: RequestRow[]) {
+			state.teamVacations = data;
+		},
+		SET_TEAM_VACATIONS_LOADING(state, loading: boolean) {
+			state.teamVacationsLoading = loading;
 		},
 	},
 	actions: {
@@ -116,6 +126,15 @@ const requestsModule: Module<RequestsState, unknown> = {
 		async rejectRequest({ dispatch, state }, { id, comment }: { id: number; comment: string }) {
 			await api.put(`/vacation-requests/${id}/reject`, { comment });
 			await dispatch("fetchValidatorRequests", { page: state.validatorPage });
+		},
+		async fetchTeamVacations({ commit }, { startDate, endDate }: { startDate: string; endDate: string }) {
+			commit("SET_TEAM_VACATIONS_LOADING", true);
+			try {
+				const response = await api.get("/team-vacations", { params: { startDate, endDate } });
+				commit("SET_TEAM_VACATIONS", response.data);
+			} finally {
+				commit("SET_TEAM_VACATIONS_LOADING", false);
+			}
 		},
 	},
 };

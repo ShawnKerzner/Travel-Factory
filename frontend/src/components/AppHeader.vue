@@ -14,7 +14,10 @@ function handleLogout() {
 
 <template>
   <header class="flex items-center justify-between border-b px-6 py-4">
-    <span class="font-semibold text-gray-800">Vacation Management</span>
+    <div class="flex items-center gap-6">
+      <span class="font-semibold text-gray-800">Vacation Management</span>
+      <RouterLink to="/team-planning" class="text-sm text-blue-600 hover:underline">Team Planning</RouterLink>
+    </div>
     <BaseButton type="button" @click="handleLogout">Log out</BaseButton>
   </header>
 </template>

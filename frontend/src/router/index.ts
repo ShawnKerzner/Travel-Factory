@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/Login.vue";
 import RequesterHome from "../views/RequesterHome.vue";
 import ValidatorDashboard from "../views/ValidatorDashboard.vue";
+import TeamPlanningView from "../views/TeamPlanningView.vue";
 import store from "../store";
 
 const router = createRouter({
@@ -20,6 +21,12 @@ const router = createRouter({
 			name: "validator-dashboard",
 			component: ValidatorDashboard,
 			meta: { requiresAuth: true, role: "validator" },
+		},
+		{
+			path: "/team-planning",
+			name: "team-planning",
+			component: TeamPlanningView,
+			meta: { requiresAuth: true },
 		},
 	],
 });
