@@ -28,7 +28,6 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 
 ## Decision log
 
-- Project set up as its own repo at `vacation-management/`, separate from the DI_Bootcamp exercises repo. Why: DI_Bootcamp has its own unrelated CLAUDE.md contract (a progress-tracking coach for bootcamp exercises); this is a different, standalone project.
 - Backend and frontend: TypeScript. Why: TypeORM's decorator-based entities and CEF's typed handlers are built around TypeScript; JavaScript would lose most of that benefit.
 - Business actions (submit/approve/reject) are modeled as domain commands handled by pure command-handler functions, which emit typed domain events (VacationRequestSubmitted/Approved/Rejected) through a small in-process EventEmitter-based bus. CEF route handlers stay thin adapters (parse HTTP -> build command -> dispatch -> return result). Why: directly satisfies the "proper use of commands/events" grading criterion, and keeps command handlers unit-testable as plain functions with no HTTP/CEF involved.
 - PostgreSQL runs via Docker Compose (docker-compose.yml), not a local install. Why: consistent setup regardless of machine, and makes spinning up a separate vacation_test database trivial (docker/init-test-db.sql).
