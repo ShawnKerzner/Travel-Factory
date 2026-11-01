@@ -23,7 +23,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 13 | Requester page | done |
 | 14 | Validator dashboard | done |
 | 15 | Team planning view | done |
-| 16 | (extra) UX extras | not started |
+| 16 | (extra) UX extras | done |
 | 17 | Wrap-up (README, final review) | in progress |
 
 ## Decision log
@@ -83,3 +83,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - 5 new frontend tests cover RejectRequestModal directly; approve, reject-with-comment, both filters combined, and both bug fixes above were verified live against the real backend and database.
 - Team planning defaults to the current calendar month on load, requires an explicit "View" click to re-query (not auto-fetch per keystroke, since a partially-typed date is invalid mid-entry), and is open to both roles (requireAuth only, no role meta on the route) - genuinely shared, not gated. Only the new current-month-range calculation got a dedicated test (month/year boundaries are easy to get subtly wrong); the rest reuses already-tested pieces (RequestTable, the same date validation from chunk 13) and was verified live instead, including confirming a requester can reach the page with a real 200, not a 403.
 - Chunk 17 cross-check: initial page-load fetches (my requests, validator list + requesters dropdown, team vacations) had no error handling - a failure other than 401 just showed an empty list with no explanation. Fixed with a loadError ref per view, shown via ErrorMessage. Found and fixed a second issue live while verifying the fix: the error and the empty-state messages were rendering at the same time (contradictory - "couldn't load" next to "you haven't submitted any"), since the v-if chain didn't treat them as mutually exclusive. Reordered to loading -> error -> empty -> table so only one ever shows. Verified live by actually stopping the backend and confirming the real error message appears alone, not a blank/confusing list.
+- Chunk 16 (extra, done out of order at the user's request): of the 5 UX extras listed, empty states and loading states were already built as part of chunks 13-15; added the remaining 3 - day count, success/error handling, and cancel pending request.
+- Day count uses UTC midnight for both dates, not local midnight, specifically to avoid a DST-related off-by-one: a local calendar day can be 23 or 25 hours long across a daylight-saving transition, which would throw off a naive millisecond-difference day count.
+- Toasts are success-only, via a small Vuex module kept consistent with the rest of the app's state management (auth, requests) rather than introducing a second pattern this late. Inline errors stay as-is, since they already carry useful context (which field, which action) that a transient toast would lose.
+- Cancel confirmation started as a native confirm() dialog, then was replaced with a custom Modal (reusing the same component RejectRequestModal already uses) after discovering native dialogs can't be reliably driven through browser automation and don't match the app's styling anyway - a real example of a design choice changing because of what live testing actually surfaced, not just reasoned about in the abstract.

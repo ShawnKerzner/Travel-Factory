@@ -41,6 +41,7 @@ async function handleReject() {
 	submitting.value = true;
 	try {
 		await store.dispatch("requests/rejectRequest", { id: props.requestId, comment: comment.value });
+		store.dispatch("toasts/show", "Request rejected");
 		emit("close");
 	} catch (error: any) {
 		submitError.value = error.response?.data?.error ?? "Could not reject the request. Please try again.";

@@ -59,6 +59,7 @@ async function handleApprove(request: RequestRow) {
 	actionError.value = "";
 	try {
 		await store.dispatch("requests/approveRequest", { id: request.id });
+		store.dispatch("toasts/show", "Request approved");
 	} catch (error: any) {
 		actionError.value = error.response?.data?.error ?? "Could not approve the request.";
 	}

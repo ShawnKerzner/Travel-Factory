@@ -10,6 +10,10 @@ function mountForm(submitImpl: (...args: any[]) => Promise<any>) {
 				namespaced: true,
 				actions: { submitRequest: submitImpl },
 			},
+			toasts: {
+				namespaced: true,
+				actions: { show: vi.fn() },
+			},
 		},
 	});
 	return mount(SubmitRequestForm, { global: { plugins: [store] } });

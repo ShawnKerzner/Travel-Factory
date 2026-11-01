@@ -100,6 +100,10 @@ const requestsModule: Module<RequestsState, unknown> = {
 			await api.post("/vacation-requests", payload);
 			await dispatch("fetchMyRequests", { page: state.myRequestsPage, limit: state.myRequestsLimit });
 		},
+		async cancelRequest({ dispatch, state }, { id }: { id: number }) {
+			await api.delete(`/vacation-requests/${id}`);
+			await dispatch("fetchMyRequests", { page: state.myRequestsPage, limit: state.myRequestsLimit });
+		},
 		async fetchValidatorRequests({ commit, state }, { page = 1 }: { page?: number } = {}) {
 			commit("SET_VALIDATOR_LOADING", true);
 			try {

@@ -8,6 +8,9 @@ import Pagination from "../components/Pagination.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorMessage from "../components/ErrorMessage.vue";
+import BaseButton from "../components/BaseButton.vue";
+import CancelRequestModal from "../components/CancelRequestModal.vue";
+import type { RequestRow } from "../components/RequestTable.vue";
 
 const store = useStore();
 
@@ -18,6 +21,9 @@ const myRequestsLimit = computed(() => store.state.requests.myRequestsLimit);
 const loading = computed(() => store.state.requests.loading);
 const loadError = ref("");
 
+const cancelModalOpen = ref(false);
+const cancelTarget = ref<RequestRow | null>(null);
+
 async function loadPage(page: number) {
 	loadError.value = "";
 	try {
@@ -25,6 +31,16 @@ async function loadPage(page: number) {
 	} catch (error: any) {
 		loadError.value = error.response?.data?.error ?? "Could not load your requests. Please try again.";
 	}
+}
+
+function openCancel(request: RequestRow) {
+	cancelTarget.value = request;
+	cancelModalOpen.value = true;
+}
+
+function closeCancel() {
+	cancelModalOpen.value = false;
+	cancelTarget.value = null;
 }
 
 onMounted(() => loadPage(1));
@@ -45,7 +61,13 @@ onMounted(() => loadPage(1));
         <ErrorMessage v-else-if="loadError" :message="loadError" />
         <EmptyState v-else-if="myRequests.length === 0" message="You haven't submitted any vacation requests yet." />
         <template v-else>
-          <RequestTable :requests="myRequests" />
+          <RequestTable :requests="myRequests">
+            <template #actions="{ request }">
+              <BaseButton v-if="request.status === 'pending'" type="button" @click="openCancel(request)">
+                Cancel
+              </BaseButton>
+            </template>
+          </RequestTable>
           <div class="mt-4">
             <Pagination
               :page="myRequestsPage"
@@ -57,5 +79,7 @@ onMounted(() => loadPage(1));
         </template>
       </section>
     </main>
+
+    <CancelRequestModal :open="cancelModalOpen" :request="cancelTarget" @close="closeCancel" />
   </div>
 </template>

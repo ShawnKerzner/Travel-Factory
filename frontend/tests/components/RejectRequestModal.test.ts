@@ -10,6 +10,10 @@ function mountModal(rejectImpl: (...args: any[]) => Promise<any>, open = true) {
 				namespaced: true,
 				actions: { rejectRequest: rejectImpl },
 			},
+			toasts: {
+				namespaced: true,
+				actions: { show: vi.fn() },
+			},
 		},
 	});
 	return mount(RejectRequestModal, {
