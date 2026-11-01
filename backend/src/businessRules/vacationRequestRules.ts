@@ -26,6 +26,10 @@ export function isModifiable(status: VacationRequestStatus): boolean {
 	return status !== VacationRequestStatus.APPROVED;
 }
 
+export function isPending(status: VacationRequestStatus): boolean {
+	return status === VacationRequestStatus.PENDING;
+}
+
 export function todayDateString(): string {
 	const now = new Date();
 	const year = now.getFullYear();

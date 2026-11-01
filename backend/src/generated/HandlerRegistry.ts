@@ -17,11 +17,15 @@ export class HandlerRegistry {
 			"handlers/hello#parseHelloByNameInput": __cef_handlers_hello.parseHelloByNameInput,
 			"handlers/users#listUsers": __cef_handlers_users.listUsers,
 			"handlers/users#parseUsersListRequest": __cef_handlers_users.parseUsersListRequest,
+			"handlers/vacationRequests#approveRequest": __cef_handlers_vacationRequests.approveRequest,
 			"handlers/vacationRequests#getMyRequests": __cef_handlers_vacationRequests.getMyRequests,
 			"handlers/vacationRequests#listVacationRequests": __cef_handlers_vacationRequests.listVacationRequests,
+			"handlers/vacationRequests#parseApproveRequest": __cef_handlers_vacationRequests.parseApproveRequest,
 			"handlers/vacationRequests#parseMyRequestsRequest": __cef_handlers_vacationRequests.parseMyRequestsRequest,
+			"handlers/vacationRequests#parseRejectRequest": __cef_handlers_vacationRequests.parseRejectRequest,
 			"handlers/vacationRequests#parseSubmitRequest": __cef_handlers_vacationRequests.parseSubmitRequest,
 			"handlers/vacationRequests#parseValidatorListRequest": __cef_handlers_vacationRequests.parseValidatorListRequest,
+			"handlers/vacationRequests#rejectRequest": __cef_handlers_vacationRequests.rejectRequest,
 			"handlers/vacationRequests#submitRequest": __cef_handlers_vacationRequests.submitRequest,
 		});
 	}

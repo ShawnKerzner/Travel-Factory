@@ -2,6 +2,8 @@ import { CommonEvent } from "commoneventframework/dist/types/commonEvent";
 import { Response } from "commoneventframework";
 import { InputParserFn, HandlerFn } from "./types";
 import { submitVacationRequest } from "../commands/submitVacationRequest";
+import { approveVacationRequest } from "../commands/approveVacationRequest";
+import { rejectVacationRequest } from "../commands/rejectVacationRequest";
 import { getMyVacationRequests } from "../queries/getMyVacationRequests";
 import { getVacationRequestsForValidator, parseStatusFilter, ValidatorListFilters } from "../queries/getVacationRequestsForValidator";
 import { composeParsers, requireAuth, requireRole } from "../auth/guards";
@@ -83,5 +85,45 @@ export const listVacationRequests: HandlerFn = async (input: ValidatorListInput)
 		{ status: input.status, userId: input.userId },
 		{ page: input.page, limit: input.limit }
 	);
+	return new Response(200, result as unknown as object);
+};
+
+interface ApproveRejectInput {
+	id: number;
+	comment?: string | null;
+}
+
+export const parseApproveInput: InputParserFn = (event: CommonEvent) => {
+	return { id: Number(event.pathParameters?.id) };
+};
+
+export const parseApproveRequest = composeParsers(requireRole(UserRole.VALIDATOR), parseApproveInput);
+
+export const approveRequest: HandlerFn = async (input: ApproveRejectInput) => {
+	const result = await approveVacationRequest({ id: input.id });
+	if (result instanceof Response) {
+		return result;
+	}
+	return new Response(200, result as unknown as object);
+};
+
+export const parseRejectInput: InputParserFn = (event: CommonEvent) => {
+	let body: any;
+	try {
+		body = event.body ? JSON.parse(event.body) : {};
+	} catch {
+		return new Response(400, { error: "Invalid JSON body" });
+	}
+
+	return { id: Number(event.pathParameters?.id), comment: body.comment };
+};
+
+export const parseRejectRequest = composeParsers(requireRole(UserRole.VALIDATOR), parseRejectInput);
+
+export const rejectRequest: HandlerFn = async (input: ApproveRejectInput) => {
+	const result = await rejectVacationRequest({ id: input.id, comment: input.comment });
+	if (result instanceof Response) {
+		return result;
+	}
 	return new Response(200, result as unknown as object);
 };

@@ -15,7 +15,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 5 | Submit request endpoint | done |
 | 6 | My requests endpoint (pagination) | done |
 | 7 | Validator list endpoint (filters + pagination) | done |
-| 8 | Approve / reject endpoints | not started |
+| 8 | Approve / reject endpoints | done |
 | 9 | Team planning endpoint | not started |
 | 10 | (extra) Edit/cancel pending request | not started |
 | 11 | Frontend setup (Vite, Tailwind, Router, Vuex, Axios) | not started |
@@ -53,3 +53,6 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - GET /users (filter dropdown) returns requesters only, never validators. Why: validators can't submit requests, so they'd just be dead options that never match anything.
 - An invalid ?status= value is silently ignored (treated as no filter), same philosophy as invalid pagination params. Why: a GET shouldn't error over a bad query param.
 - GET /vacation-requests and POST /vacation-requests share the same root.yaml path key - YAML doesn't allow the same top-level mapping key twice, so both methods have to live under one shared path entry (get: and post: as siblings), not two separate ones. Caught immediately by cef-gen-handlers failing outright with a YAMLException, not a silent bug.
+- Once a request leaves pending (approved OR rejected), it's locked from further action - a new isPending check, separate from isModifiable (rule 3's literal wording, != APPROVED only). Why: rule 3 is silent on rejected requests, and treating only "pending" as actionable is the simpler mental model, avoiding reopening a rejection by approving it later.
+- Reject validates the comment (rule 5) before touching the database at all, same pattern as submit's date checks. Why: cheap, pure validation should happen before any DB work, not after.
+- approveVacationRequest/rejectVacationRequest both guard with Number.isInteger(id) before querying, returning 404 immediately for a non-numeric id. Why: a malformed id can't exist either way, and passing NaN straight into a SQL query risked a 500 instead of a clean 404.

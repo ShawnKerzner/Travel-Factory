@@ -61,6 +61,54 @@ paths:
         '403':
           description: Authenticated but not a validator
 
+  /vacation-requests/:id/approve:
+    patch:
+      x-handler: handlers/vacationRequests#approveRequest
+      x-inputParser: handlers/vacationRequests#parseApproveRequest
+      summary: Approve a pending vacation request (validator only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a validator
+        '404':
+          description: Request not found
+        '409':
+          description: Request is not pending
+
+  /vacation-requests/:id/reject:
+    patch:
+      x-handler: handlers/vacationRequests#rejectRequest
+      x-inputParser: handlers/vacationRequests#parseRejectRequest
+      summary: Reject a pending vacation request with a required comment (validator only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Missing or blank comment
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a validator
+        '404':
+          description: Request not found
+        '409':
+          description: Request is not pending
+
   /users:
     get:
       x-handler: handlers/users#listUsers
