@@ -16,6 +16,23 @@ paths:
         '401':
           description: Invalid email or password
 
+  /vacation-requests:
+    post:
+      x-handler: handlers/vacationRequests#submitRequest
+      x-inputParser: handlers/vacationRequests#parseSubmitRequest
+      summary: Submit a vacation request (requester only)
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Invalid input or date order/past-date rule violation
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a requester
+        '409':
+          description: Overlaps an existing request
+
   /hello:
     get:
       x-handler: handlers/hello#getHello

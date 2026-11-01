@@ -12,7 +12,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 2 | Database (entities, migration, seed) | done |
 | 3 | Auth (JWT login, role checks) | done |
 | 4 | Business rules module + unit tests | done |
-| 5 | Submit request endpoint | not started |
+| 5 | Submit request endpoint | done |
 | 6 | My requests endpoint (pagination) | not started |
 | 7 | Validator list endpoint (filters + pagination) | not started |
 | 8 | Approve / reject endpoints | not started |
@@ -44,3 +44,6 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - Rule 2 (no overlap) treats touching boundary dates as overlapping, and ignores rejected requests entirely. Why: each date is a whole calendar day, so sharing one is a genuine conflict; a rejected request never became a real vacation, so it shouldn't permanently block those dates.
 - Rule 4 (no past requests) allows a start date of today. Why: today hasn't happened yet at submission time, so it isn't "the past."
 - Dates are compared as plain "YYYY-MM-DD" strings, never converted to Date objects, in all business rule functions. Why: string comparison sorts identically to chronological order for this format, and sidesteps timezone bugs entirely rather than working around them.
+- POST /vacation-requests is requester-only. Why: the spec cleanly separates "Requester Interface: submit" from "Validator Interface: review," and allowing validators to submit opens an unanswered question (who approves a validator's own request) that's out of scope.
+- Overlap violations return 409 Conflict, while date-order/past-date violations return 400. Why: 409 is the more semantically correct status for "conflicts with an existing resource," distinct from malformed/invalid input.
+- Every distinct outcome of this endpoint (201, both 400 paths, 403, 409) was manually verified against the real running dev server and the real database, not just unit tests. Why: passing unit tests proves internal logic consistency, not that the real HTTP/DB path actually behaves that way end to end.
