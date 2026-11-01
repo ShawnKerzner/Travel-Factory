@@ -4,6 +4,8 @@ import { InputParserFn, HandlerFn } from "./types";
 import { submitVacationRequest } from "../commands/submitVacationRequest";
 import { approveVacationRequest } from "../commands/approveVacationRequest";
 import { rejectVacationRequest } from "../commands/rejectVacationRequest";
+import { cancelVacationRequest } from "../commands/cancelVacationRequest";
+import { editVacationRequest } from "../commands/editVacationRequest";
 import { getMyVacationRequests } from "../queries/getMyVacationRequests";
 import { getVacationRequestsForValidator, parseStatusFilter, ValidatorListFilters } from "../queries/getVacationRequestsForValidator";
 import { getTeamVacations } from "../queries/getTeamVacations";
@@ -153,5 +155,64 @@ export const parseTeamPlanningRequest = composeParsers(requireAuth, parseTeamPla
 
 export const getTeamPlanning: HandlerFn = async (input: TeamPlanningInput) => {
 	const result = await getTeamVacations(input.startDate, input.endDate);
+	return new Response(200, result as unknown as object);
+};
+
+interface IdOnlyInput {
+	id: number;
+	auth: { sub: number; role: string };
+}
+
+export const parseIdOnlyInput: InputParserFn = (event: CommonEvent) => {
+	return { id: Number(event.pathParameters?.id) };
+};
+
+export const parseCancelRequest = composeParsers(requireRole(UserRole.REQUESTER), parseIdOnlyInput);
+
+export const cancelRequest: HandlerFn = async (input: IdOnlyInput) => {
+	const result = await cancelVacationRequest({ id: input.id, userId: input.auth.sub });
+	if (result instanceof Response) {
+		return result;
+	}
+	return new Response(200, result as unknown as object);
+};
+
+interface EditRequestInput {
+	id: number;
+	startDate: string;
+	endDate: string;
+	reason?: string | null;
+	auth: { sub: number; role: string };
+}
+
+export const parseEditInput: InputParserFn = (event: CommonEvent) => {
+	let body: any;
+	try {
+		body = event.body ? JSON.parse(event.body) : {};
+	} catch {
+		return new Response(400, { error: "Invalid JSON body" });
+	}
+
+	const { startDate, endDate, reason } = body;
+	if (!startDate || !endDate) {
+		return new Response(400, { error: "startDate and endDate are required" });
+	}
+
+	return { id: Number(event.pathParameters?.id), startDate, endDate, reason };
+};
+
+export const parseEditRequest = composeParsers(requireRole(UserRole.REQUESTER), parseEditInput);
+
+export const editRequest: HandlerFn = async (input: EditRequestInput) => {
+	const result = await editVacationRequest({
+		id: input.id,
+		userId: input.auth.sub,
+		startDate: input.startDate,
+		endDate: input.endDate,
+		reason: input.reason,
+	});
+	if (result instanceof Response) {
+		return result;
+	}
 	return new Response(200, result as unknown as object);
 };

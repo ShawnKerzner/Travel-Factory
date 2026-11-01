@@ -1,7 +1,6 @@
 import {
 	isValidDateRange,
 	doesOverlap,
-	isModifiable,
 	isInPast,
 	isValidRejectionComment,
 } from "../src/businessRules/vacationRequestRules";
@@ -39,16 +38,6 @@ describe("doesOverlap", () => {
 
 	test("7: a rejected request is ignored, even if dates would otherwise overlap", () => {
 		expect(doesOverlap({ startDate: "2026-01-05", endDate: "2026-01-07" }, [rejected("2026-01-01", "2026-01-10")])).toBe(false);
-	});
-});
-
-describe("isModifiable", () => {
-	test("8: pending requests are modifiable", () => {
-		expect(isModifiable(VacationRequestStatus.PENDING)).toBe(true);
-	});
-
-	test("9: approved requests are not modifiable", () => {
-		expect(isModifiable(VacationRequestStatus.APPROVED)).toBe(false);
 	});
 });
 

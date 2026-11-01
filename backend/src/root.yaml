@@ -109,6 +109,52 @@ paths:
         '409':
           description: Request is not pending
 
+  /vacation-requests/:id:
+    delete:
+      x-handler: handlers/vacationRequests#cancelRequest
+      x-inputParser: handlers/vacationRequests#parseCancelRequest
+      summary: Cancel your own pending vacation request (requester only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a requester
+        '404':
+          description: Request not found, or not yours
+        '409':
+          description: Request is not pending
+    patch:
+      x-handler: handlers/vacationRequests#editRequest
+      x-inputParser: handlers/vacationRequests#parseEditRequest
+      summary: Edit your own pending vacation request's dates/reason (requester only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Invalid input or date order/past-date rule violation
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Authenticated but not a requester
+        '404':
+          description: Request not found, or not yours
+        '409':
+          description: Request is not pending, or overlaps an existing request
+
   /team-vacations:
     get:
       x-handler: handlers/vacationRequests#getTeamPlanning

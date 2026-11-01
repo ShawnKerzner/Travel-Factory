@@ -17,7 +17,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 7 | Validator list endpoint (filters + pagination) | done |
 | 8 | Approve / reject endpoints | done |
 | 9 | Team planning endpoint | done |
-| 10 | (extra) Edit/cancel pending request | not started |
+| 10 | (extra) Edit/cancel pending request | done |
 | 11 | Frontend setup (Vite, Tailwind, Router, Vuex, Axios) | not started |
 | 12 | Login + auth store + route guards | not started |
 | 13 | Requester page | not started |
@@ -58,3 +58,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - approveVacationRequest/rejectVacationRequest both guard with Number.isInteger(id) before querying, returning 404 immediately for a non-numeric id. Why: a malformed id can't exist either way, and passing NaN straight into a SQL query risked a 500 instead of a clean 404.
 - Resolved the "team vacation planning for both roles" vague requirement: "team" means the whole company, since Users (id, name, email, password, role, created_at) has no team/department field and the spec doesn't call for adding one. Only approved requests count as "on vacation" - pending isn't confirmed, so showing it as fact could mislead planning. startDate/endDate are required query params (400 if missing), since there's no sensible default range for a calendar-style view.
 - The overlap check for this endpoint runs at the database level via TypeORM's LessThanOrEqual/MoreThanOrEqual operators - the same inclusive-boundary formula as doesOverlap from chunk 4, just comparing against the query range instead of another request's dates.
+- Built both edit and cancel (chunk 10, extra), scoped to the owner's own pending requests only, via a single query (where: { id, user: { id: userId } }) rather than a separate ownership check. Why: that pattern makes "doesn't exist" and "not yours" return the identical 404 for free, with no way to accidentally leak which case it was.
+- Cancel hard-deletes the row rather than adding a CANCELLED status. Why: no schema change needed, and a cancelled pending request was never a confirmed commitment worth keeping a record of.
+- Both edit and cancel require pending specifically (via isPending), not rule 3's literal wording. Why: consistent with chunk 8's decision that rejected is also final - a rejected request should be resubmitted fresh, not edited back to life. This left isModifiable (built in chunk 4 as a literal rule 3 check) unused by every real endpoint, since the stricter pending-only policy always ended up being the actual gate - so it was removed, along with its 2 tests, rather than kept as correct-but-unused code with a name that could be mistakenly called instead of isPending later.
+- editVacationRequest excludes the request being edited from its own overlap check (otherRequests.filter(r => r.id !== id)). Why: without it, a valid edit could never succeed, since the request would always "overlap" its own prior dates.

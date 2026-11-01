@@ -22,10 +22,6 @@ export function doesOverlap(newRequest: DateRange, existing: ExistingRequest[]):
 	});
 }
 
-export function isModifiable(status: VacationRequestStatus): boolean {
-	return status !== VacationRequestStatus.APPROVED;
-}
-
 export function isPending(status: VacationRequestStatus): boolean {
 	return status === VacationRequestStatus.PENDING;
 }
