@@ -33,7 +33,10 @@ export const login: HandlerFn = async (input: LoginInput) => {
 	}
 
 	const userRepo = AppDataSource.getRepository(User);
-	const user = await userRepo.findOneBy({ email: input.email });
+	const user = await userRepo.findOne({
+		where: { email: input.email },
+		select: { id: true, name: true, email: true, password: true, role: true, createdAt: true },
+	});
 	if (!user) {
 		return new Response(401, { error: "Invalid email or password" });
 	}

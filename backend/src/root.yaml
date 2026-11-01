@@ -33,6 +33,26 @@ paths:
         '409':
           description: Overlaps an existing request
 
+  /vacation-requests/me:
+    get:
+      x-handler: handlers/vacationRequests#getMyRequests
+      x-inputParser: handlers/vacationRequests#parseMyRequestsRequest
+      summary: List the authenticated user's own vacation requests, paginated
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Missing or invalid token
+
   /hello:
     get:
       x-handler: handlers/hello#getHello

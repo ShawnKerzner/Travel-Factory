@@ -2,8 +2,10 @@ import { CommonEvent } from "commoneventframework/dist/types/commonEvent";
 import { Response } from "commoneventframework";
 import { InputParserFn, HandlerFn } from "./types";
 import { submitVacationRequest } from "../commands/submitVacationRequest";
-import { composeParsers, requireRole } from "../auth/guards";
+import { getMyVacationRequests } from "../queries/getMyVacationRequests";
+import { composeParsers, requireAuth, requireRole } from "../auth/guards";
 import { UserRole } from "../entities/User";
+import { parsePagination, PaginationParams } from "../utils/pagination";
 
 interface SubmitRequestInput {
 	startDate: string;
@@ -43,4 +45,19 @@ export const submitRequest: HandlerFn = async (input: SubmitRequestInput) => {
 	}
 
 	return new Response(201, result as unknown as object);
+};
+
+interface MyRequestsInput extends PaginationParams {
+	auth: { sub: number; role: string };
+}
+
+export const parseMyRequestsInput: InputParserFn = (event: CommonEvent) => {
+	return parsePagination(event.queryStringParameters);
+};
+
+export const parseMyRequestsRequest = composeParsers(requireAuth, parseMyRequestsInput);
+
+export const getMyRequests: HandlerFn = async (input: MyRequestsInput) => {
+	const result = await getMyVacationRequests(input.auth.sub, { page: input.page, limit: input.limit });
+	return new Response(200, result as unknown as object);
 };

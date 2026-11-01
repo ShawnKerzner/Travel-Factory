@@ -13,7 +13,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 3 | Auth (JWT login, role checks) | done |
 | 4 | Business rules module + unit tests | done |
 | 5 | Submit request endpoint | done |
-| 6 | My requests endpoint (pagination) | not started |
+| 6 | My requests endpoint (pagination) | done |
 | 7 | Validator list endpoint (filters + pagination) | not started |
 | 8 | Approve / reject endpoints | not started |
 | 9 | Team planning endpoint | not started |
@@ -47,3 +47,6 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - POST /vacation-requests is requester-only. Why: the spec cleanly separates "Requester Interface: submit" from "Validator Interface: review," and allowing validators to submit opens an unanswered question (who approves a validator's own request) that's out of scope.
 - Overlap violations return 409 Conflict, while date-order/past-date violations return 400. Why: 409 is the more semantically correct status for "conflicts with an existing resource," distinct from malformed/invalid input.
 - Every distinct outcome of this endpoint (201, both 400 paths, 403, 409) was manually verified against the real running dev server and the real database, not just unit tests. Why: passing unit tests proves internal logic consistency, not that the real HTTP/DB path actually behaves that way end to end.
+- GET /vacation-requests/me requires only requireAuth, not a specific role. Why: it's inherently scoped to "my own data" regardless of role.
+- Pagination response shape is { data, total, page, limit }, defaulting to page=1/limit=10; invalid page/limit values silently fall back to defaults rather than erroring. Why: standard shape so the frontend can compute total pages; a GET for your own data shouldn't 400 over a bad query param.
+- User.password is now @Column({ select: false }) - never loaded by any query by default, anywhere, unless explicitly re-selected. Why: findAndCount's relations option loads the full related entity by default; a nested TypeORM select scoped to that relation turned out to break the count query entirely (confirmed by removing it), so the fix had to be at the entity level instead. login's query was updated to explicitly re-select password, since it needs the hash to compare against.

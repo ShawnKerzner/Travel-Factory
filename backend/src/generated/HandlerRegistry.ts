@@ -14,6 +14,8 @@ export class HandlerRegistry {
 			"handlers/hello#getHello": __cef_handlers_hello.getHello,
 			"handlers/hello#getHelloByName": __cef_handlers_hello.getHelloByName,
 			"handlers/hello#parseHelloByNameInput": __cef_handlers_hello.parseHelloByNameInput,
+			"handlers/vacationRequests#getMyRequests": __cef_handlers_vacationRequests.getMyRequests,
+			"handlers/vacationRequests#parseMyRequestsRequest": __cef_handlers_vacationRequests.parseMyRequestsRequest,
 			"handlers/vacationRequests#parseSubmitRequest": __cef_handlers_vacationRequests.parseSubmitRequest,
 			"handlers/vacationRequests#submitRequest": __cef_handlers_vacationRequests.submitRequest,
 		});
