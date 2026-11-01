@@ -20,7 +20,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 10 | (extra) Edit/cancel pending request | done |
 | 11 | Frontend setup (Vite, Tailwind, Router, Vuex, Axios) | done |
 | 12 | Login + auth store + route guards | done |
-| 13 | Requester page | not started |
+| 13 | Requester page | done |
 | 14 | Validator dashboard | not started |
 | 15 | Team planning view | not started |
 | 16 | (extra) UX extras | not started |
@@ -71,3 +71,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 - JWT role is read client-side via a small hand-rolled base64url decoder (src/utils/jwt.ts), not a library - this is purely for picking a redirect target, never for trust/authorization, which the backend re-verifies on every real request regardless.
 - Introduced the first shared components (BaseInput, BaseButton, ErrorMessage) this chunk rather than waiting for chunk 13, since the login form needed them and they match the kickoff doc's own expected shared-component list.
 - Login's 10 tests cover the auth Vuex module and the LoginForm component directly (Vitest + Vue Test Utils, matching the kickoff doc's named test scope); route guard redirects were instead verified live in the browser against the real backend - successful login, invalid credentials, wrong role, logged-out access to a protected route, and already-authenticated access to /login.
+- RequestTable was built generic from the start (showRequester prop, scoped #actions slot) so chunk 14's validator dashboard can reuse it with an extra column and action buttons, rather than rebuilding a near-identical table - this was an explicit ask, not a default assumption.
+- BaseInput needed inheritAttrs: false + v-bind="$attrs" on the inner <input>, not the wrapping <label>. Without it, an extra prop like :min would silently land on the label (where it does nothing) instead of the actual input - caught before it shipped, while wiring up the date inputs' min attribute.
+- Client-side validation mirrors the backend's rules via its own small isValidDateRange/isInPast functions (frontend/src/utils/validation.ts) - necessarily duplicated, not shared, since frontend and backend are separate npm packages with no shared package between them.
+- 11 new tests cover SubmitRequestForm, StatusBadge, and Pagination directly, matching the kickoff doc's named frontend test targets (form validation, status badge, pagination); the full list/loading/empty-state flow and the actual submit-to-list-refresh behavior were verified live in the browser against the real backend and real database instead, including confirming a submitted request's row in Postgres directly.

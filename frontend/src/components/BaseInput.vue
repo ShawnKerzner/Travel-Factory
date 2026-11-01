@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 defineProps<{
 	modelValue: string;
 	type?: string;
@@ -15,6 +17,7 @@ defineEmits<{
   <label class="block">
     <span v-if="label" class="mb-1 block text-sm font-medium text-gray-700">{{ label }}</span>
     <input
+      v-bind="$attrs"
       :type="type ?? 'text'"
       :value="modelValue"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
