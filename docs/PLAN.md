@@ -24,7 +24,7 @@ Stack: Vue 3 + Vuex 4 (frontend), Node.js + TypeORM + PostgreSQL (backend), Comm
 | 14 | Validator dashboard | done |
 | 15 | Team planning view | done |
 | 16 | (extra) UX extras | done |
-| 17 | Wrap-up (README, final review) | in progress |
+| 17 | Wrap-up (README, final review) | done |
 
 ## Decision log
 
